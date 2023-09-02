@@ -2,9 +2,10 @@ from config import Config
 from utils import JsonFunction
 import os, asyncio
 from tqdm import tqdm
-from pyppeteer import launch
+from ratelimiter import RateLimiter
 from bs4 import BeautifulSoup
 from urllib import parse
+import requests
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -20,6 +21,7 @@ class Get1MgData:
         print("________________Getting Information____________")
         asyncio.get_event_loop().run_until_complete(self.get_details(self.links))
 
+    @RateLimiter(max_calls=1, period=1)
     async def get_drug_detail(self, link) -> dict:
         """
         return Dictionary containing drug details
@@ -27,15 +29,9 @@ class Get1MgData:
         :return: dict with drug details
         """
         drug_detail = {}
-        browser = await launch()
-        page = await browser.newPage()
-        await page.goto(link)
         try:
-            html = await page.evaluate('''() => {
-                        return document.querySelector('.main-content').innerHTML;
-                    }''')
-
-            parsed_html = BeautifulSoup(html, 'html.parser')
+            header = {"user-agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) XX"}
+            parsed_html = BeautifulSoup(requests.get(link, headers=header).text, 'html.parser')
 
             composition = parsed_html.find("div", {"class": "saltInfo DrugHeader__meta-value___vqYM0"})
             composition = composition.find('a', href=True).text
@@ -47,9 +43,6 @@ class Get1MgData:
         except:
             self.data_dict.update({"composition": None})
 
-        await page.close()
-        await browser.disconnect()
-        await browser.close()
 
         return drug_detail
 
@@ -59,24 +52,17 @@ class Get1MgData:
         :param links: list of link whose medicine composition we want
         :return: Null
         """
+
         for idx, link in tqdm(enumerate(links)):
             drug_details = {
                 "name": parse.unquote(link.split(Config.link_split_value)[1])
             }
 
-            browser = await launch()
-            page = await browser.newPage()
-            await page.goto(link)
-            header = {"user-agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) XX"}
-            soup = BeautifulSoup(requests.get(url, headers=header).text)
 
 
             try:
-                html = await page.evaluate('''() => {
-                            return document.querySelector('.main-content').innerHTML;
-                        }''')
-
-                parsed_html = BeautifulSoup(html, 'html.parser')
+                header = {"user-agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) XX"}
+                parsed_html = BeautifulSoup(requests.get(link, headers=header).text, 'html.parser')
 
                 product_card = parsed_html.find("div", {"class": "row style__grid-container___3OfcL"})
 
@@ -110,9 +96,5 @@ class Get1MgData:
                     },
                     Config.data_location
                 )
-
-            await page.close()
-            await browser.disconnect()
-            await browser.close()
 
 
