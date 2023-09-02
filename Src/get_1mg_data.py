@@ -73,7 +73,6 @@ class Get1MgData:
                 product_card = parsed_html.find("div", {"class": "row style__grid-container___3OfcL"})
 
                 drug_link = Config.parent_domain + product_card.find('a', href=True)['href']
-                print(drug_link)
 
                 drug_details.update(
                     await self.get_drug_detail(drug_link)
