@@ -58,20 +58,26 @@ class Get1MgData:
                 "name": parse.unquote(link.split(Config.link_split_value)[1])
             }
 
-
-
             try:
                 header = {"user-agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows 98) XX"}
                 parsed_html = BeautifulSoup(requests.get(link, headers=header).text, 'html.parser')
 
+                # if there is suggestion list
+                if parsed_html.find("ul", {"class": "gl style__list-suggestion___3ZmkX"}):
+                    suggestion_list = parsed_html.find("ul", {"class": "gl style__list-suggestion___3ZmkX"})
+                    new_link = Config.parent_domain + suggestion_list.find('a', href=True)['href']
+
+                    # load the correct page
+                    parsed_html = BeautifulSoup(requests.get(new_link, headers=header).text, 'html.parser')
+
                 product_card = parsed_html.find("div", {"class": "row style__grid-container___3OfcL"})
 
                 drug_link = Config.parent_domain + product_card.find('a', href=True)['href']
+                print(drug_link)
 
                 drug_details.update(
                     await self.get_drug_detail(drug_link)
                 )
-
             except:
                 drug_details.update(
                     {
