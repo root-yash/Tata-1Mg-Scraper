@@ -110,5 +110,3 @@ class Get1MgData:
 
         await browser.disconnect()
         await browser.close()
-
-
