@@ -17,7 +17,7 @@ class Get1MgData:
         self.links = JsonFunction.load_data(Config.json_link_output)[Config.json_link_name]
         self.data_dict = []
 
-        if os.path.exists(Config.data_json_name):
+        if os.path.exists(Config.data_location):
             print("loading previous data")
             self.data_dict = JsonFunction.load_data(Config.data_location)[Config.data_json_name]
 

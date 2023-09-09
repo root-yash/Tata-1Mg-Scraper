@@ -18,7 +18,7 @@ def extract_names(file_location: str, sheet_name: str, column_name: str) -> None
     # convert name to link
     for name in dataframe.to_list():
         links.append(
-            "https://www.1mg.com/search/all?name=" + parse.quote(name)
+            "https://www.1mg.com/search/all?name=" + parse.quote(name.strip())
         )
 
     JsonFunction.save_data(
