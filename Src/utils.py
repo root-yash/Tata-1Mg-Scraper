@@ -36,5 +36,5 @@ class JsonFunction:
 
         df = pd.DataFrame(data=data)
 
-        df.to_csv(location, index=False)
+        df.to_csv(location, index=False, encoding="utf-8-sig")
 
